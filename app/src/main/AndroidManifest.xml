@@ -14,7 +14,6 @@
         <activity android:name=".DetailsActivity"/>
         <activity android:name=".FavoriteActivity" />
         <activity android:name=".SearchActivity" />
-        <activity android:name=".MyOpener" />
         <activity android:name=".SearchResult" />
         <activity android:name=".Covid19Activity" />
         <activity android:name=".MainActivity">

@@ -7,9 +7,17 @@ import android.os.Bundle;
 import android.widget.Button;
 import android.widget.EditText;
 
-
+/**
+ * The class is the main responsible the main page funtion
+ *  @author June Li
+ * @version 1.0
+ */
 public class Covid19Activity extends AppCompatActivity {
     @Override
+    /**
+     * The method is the entry of execute,it equivalent to main method
+     * @param savedInstanceState
+     */
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_covid19);

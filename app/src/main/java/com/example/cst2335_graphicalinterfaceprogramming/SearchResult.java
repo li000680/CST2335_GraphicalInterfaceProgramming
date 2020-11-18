@@ -1,16 +1,25 @@
 package com.example.cst2335_graphicalinterfaceprogramming;
 
-import androidx.appcompat.app.AppCompatActivity;
 
-public class SearchResult extends AppCompatActivity {
+/**
+ * The class is used to contain the the search result
+ *  @author June Li
+ * @version 1.0
+ */
+public class SearchResult {
 
     private String country;
     private String province;
     private int caseNumber;
     private String date;
     private long id;
-
+    /**
+     * The default constructor
+     */
     public SearchResult(){}
+    /**
+     * The four parameter constructor
+     */
     public SearchResult( String c,String p,int ca,String d)
     {
         country=c;
@@ -18,7 +27,9 @@ public class SearchResult extends AppCompatActivity {
         caseNumber=ca;
         date=d;
     }
-
+    /**
+     * The getters method
+     */
     public String getCountry() {
         return country;
     }
@@ -31,5 +42,5 @@ public class SearchResult extends AppCompatActivity {
     public String getDate() {
         return date;
     }
-    public long getId() {return id; }
+  //  public long getId() {return id; }
 }

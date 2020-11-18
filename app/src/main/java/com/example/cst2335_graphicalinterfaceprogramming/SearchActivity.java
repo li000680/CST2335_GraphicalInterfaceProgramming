@@ -2,7 +2,6 @@ package com.example.cst2335_graphicalinterfaceprogramming;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -16,8 +15,6 @@ import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
-
-
 import org.json.JSONArray;
 import org.json.JSONObject;
 import java.io.BufferedReader;
@@ -26,18 +23,43 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
-
+/**
+ * The class is used to search covid data according to user's input
+ *  @author June Li
+ * @version 1.0
+ */
 public class SearchActivity extends AppCompatActivity {
-
+    /**
+     * The ArrayList is used to store search result
+     */
     ArrayList<SearchResult> resultList = new ArrayList<>();
+    /**
+     * The ArrayList is used to store the country and date of search result you want to save
+     */
     ArrayList<String> favorites=new ArrayList<>();
+    /**
+     * Adapter used to listview
+     */
     MyAdapter myAdapter;
+    /**
+     * ProgressBar is used to show download progress
+     */
     ProgressBar progressBar;
+    /**
+     * The fQuery is used to call execute to get data from website
+     */
     CovidQuery fQuery = new CovidQuery();
+    /**
+     * These variables is the elementary of each search
+     */
     String country,fromDate,endDate,province,date;
     int caseNumber;
     SearchResult newSearch;
     @Override
+    /**
+     * The method is the entry of execute,it equivalent to main method
+     * @param savedInstanceState
+     */
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_search);
@@ -76,10 +98,30 @@ public class SearchActivity extends AppCompatActivity {
             startActivity(detailsIntent);
         });
     }
-
+    /**
+     * The inner class is used to read date from website using JSON
+     */
     private class CovidQuery extends AsyncTask< String, Integer, String> {
-
-        public String doInBackground(String ... args)
+        /**
+         * Override this method to perform a computation on a background thread. The
+         * specified parameters are the parameters passed to {@link #execute}
+         * by the caller of this task.
+         * <p>
+         * This will normally run on a background thread. But to better
+         * support testing frameworks, it is recommended that this also tolerates
+         * direct execution on the foreground thread, as part of the {@link #execute} call.
+         * <p>
+         * This method can call {@link #publishProgress} to publish updates
+         * on the UI thread.
+         *
+         * @param strings The parameters of the task.
+         * @return A result, defined by the subclass of this task.
+         * @see #onPreExecute()
+         * @see #onPostExecute
+         * @see #publishProgress
+         */
+        @Override
+         public String doInBackground(String ... args)
         {
             try {
                 URL url = new URL(args[0]);
@@ -87,7 +129,7 @@ public class SearchActivity extends AppCompatActivity {
                 InputStream response = urlConnection.getInputStream();
                 BufferedReader reader = new BufferedReader(new InputStreamReader(response, "UTF-8"), 8);
                 StringBuilder sb = new StringBuilder();
-                String line = "";
+                String line = null;
                 while ((line = reader.readLine()) != null) {
                     sb.append(line + "\n");
                 }
@@ -101,50 +143,121 @@ public class SearchActivity extends AppCompatActivity {
                         date = job.getString("Date");
                         newSearch= new SearchResult(country,province,caseNumber,date);
                         resultList.add(newSearch);
-                        publishProgress(i*100/json.length());
+                       // publishProgress(i*100/json.length());
                     }
                 }
             }
             catch (Exception e) {  e.printStackTrace();}
             return "done";
         }
-                //Type 2
-        protected void onProgressUpdate(Integer ... values)
-        {
+
+        /**
+         * Runs on the UI thread after {@link #publishProgress} is invoked.
+         * The specified values are the values passed to {@link #publishProgress}.
+         * The default version does nothing.
+         *
+         * @param values The values indicating progress.
+         * @see #publishProgress
+         * @see #doInBackground
+         */
+        @Override
+        protected void onProgressUpdate(Integer... values) {
+            super.onProgressUpdate(values);
             progressBar.setVisibility(View.VISIBLE);
             progressBar.setProgress(values[0]);
         }
-        //Type3
-        protected void onPostExecute(String fromDoInBackground)
-        {
-            Log.i("HTTP", fromDoInBackground);
-            progressBar.setVisibility(View.VISIBLE);
-        }
-    }
 
+        /**
+         * <p>Runs on the UI thread after {@link #doInBackground}. The
+         * specified result is the value returned by {@link #doInBackground}.
+         * To better support testing frameworks, it is recommended that this be
+         * written to tolerate direct execution as part of the execute() call.
+         * The default version does nothing.</p>
+         *
+         * <p>This method won't be invoked if the task was cancelled.</p>
+         *
+         * @param s The result of the operation computed by {@link #doInBackground}.
+         * @see #onPreExecute
+         * @see #doInBackground
+         * @see #onCancelled(Object)
+         */
+        @Override
+        protected void onPostExecute(String s) {
+            super.onPostExecute(s);
+        }
+
+//        //protected void onPostExecute(String fromDoInBackground)
+//        {
+//            Log.i("HTTP", fromDoInBackground);
+//
+//        }
+    }
+    /**
+     * The inner class is used for listView
+     */
     protected class MyAdapter extends BaseAdapter {
+        /**
+         * How many items are in the data set represented by this Adapter.
+         *
+         * @return Count of items.
+         */
         @Override
         public int getCount() {
             return resultList.size();
         }
+
+        /**
+         * Get the data item associated with the specified position in the data set.
+         *
+         * @param position Position of the item whose data we want within the adapter's
+         *                 data set.
+         * @return The data at the specified position.
+         */
         @Override
         public SearchResult getItem(int position){
             return resultList.get(position);
         }
+
+        /**
+         * Get the row id associated with the specified position in the list.
+         *
+         * @param position The position of the item within the adapter's data set whose row id we want.
+         * @return The id of the item at the specified position.
+         */
+        @Override
+        public long getItemId(int position) {
+            return position;
+        }
+
+        /**
+         * Get a View that displays the data at the specified position in the data set. You can either
+         * create a View manually or inflate it from an XML layout file. When the View is inflated, the
+         * parent View (GridView, ListView...) will apply default layout parameters unless you use
+         * {@link LayoutInflater#inflate(int, ViewGroup, boolean)}
+         * to specify a root view and to prevent attachment to the root.
+         *
+         * @param position    The position of the item within the adapter's data set of the item whose view
+         *                    we want.
+         * @param convertView The old view to reuse, if possible. Note: You should check that this view
+         *                    is non-null and of an appropriate type before using. If it is not possible to convert
+         *                    this view to display the correct data, this method can create a new view.
+         *                    Heterogeneous lists can specify their number of view types, so that this View is
+         *                    always of the right type (see {@link #getViewTypeCount()} and
+         *                    {@link #getItemViewType(int)}).
+         * @param parent      The parent that this view will eventually be attached to
+         * @return A View corresponding to the data at the specified position.
+         */
         @Override
         public View getView(int position, View old, ViewGroup parent) {
             SearchResult sr = getItem(position);
             LayoutInflater inflater = getLayoutInflater();
             View view = inflater.inflate(R.layout.activity_search_result, parent, false);
                 if (sr != null) {
-                    TextView resultView = view.findViewById(R.id.searchResult);
-                    resultView.setText(sr.getDate().substring(0,10)+":"+sr.getProvince() + ":" + sr.getCase());
+                    TextView searchView = view.findViewById(R.id.searchResult);
+                    searchView.setText(sr.getDate().substring(0,10)+":"+sr.getProvince()+":"+sr.getCase());
                 }
             return view;
             }
-        @Override
-        public long getItemId(int position) {
-            return position;
-        }
+
     }
 }
