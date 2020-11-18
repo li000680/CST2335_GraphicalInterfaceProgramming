@@ -1,12 +1,9 @@
 package com.example.cst2335_graphicalinterfaceprogramming;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.content.ContentValues;
-import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -15,23 +12,15 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.Button;
-import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
+
 
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserFactory;
-
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
@@ -41,6 +30,7 @@ import java.util.ArrayList;
 public class SearchActivity extends AppCompatActivity {
 
     ArrayList<SearchResult> resultList = new ArrayList<>();
+    ArrayList<String> favorites=new ArrayList<>();
     MyAdapter myAdapter;
     ProgressBar progressBar;
     CovidQuery fQuery = new CovidQuery();
@@ -51,22 +41,42 @@ public class SearchActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_search);
-        country=getIntent().getStringExtra("country");
-        fromDate=getIntent().getStringExtra("fromDate");
-        endDate=getIntent().getStringExtra("endDate");
-        ListView listView=findViewById(R.id.listView);
-            String urlString="https://api.covid19api.com/country/"+country+"/status/confirmed/live?from="+fromDate+"T00:00:00Z&to="+endDate+"T00:00:00Z";
-            fQuery.execute(urlString);
+        country = getIntent().getStringExtra("country");
+        fromDate = getIntent().getStringExtra("fromDate");
+        endDate = getIntent().getStringExtra("endDate");
+        ListView listView = findViewById(R.id.listView);
+        String urlString = "https://api.covid19api.com/country/" + country + "/status/confirmed/live?from=" + fromDate + "T00:00:00Z&to=" + endDate + "T00:00:00Z";
+        fQuery.execute(urlString);
         myAdapter = new MyAdapter();
         listView.setAdapter(myAdapter);
-        progressBar= findViewById(R.id.bar);
+        progressBar = findViewById(R.id.bar);
         progressBar.setVisibility(View.VISIBLE);
-        Button saveButton=findViewById(R.id.save);
+        Button saveButton = findViewById(R.id.save);
+        saveButton.setOnClickListener(clk -> {
+            AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
+            alertDialogBuilder.setTitle("Do you want to save to favorite list?")
+                    //What is the message:
+                    .setPositiveButton("Yes", (click, arg) -> {
+                        favorites.add(country + " from " + fromDate + " to " + endDate);
+                        Toast.makeText(this, "Add successfully!", Toast.LENGTH_LONG).show();
 
+                    })
+                    .setNegativeButton("No", (click, arg) -> {
+                    })
+                    .setView(getLayoutInflater().inflate(R.layout.alert_layout, null))
+                    .create().show();
+        });
+        listView.setOnItemClickListener((list, view, position, id) -> {
+            Intent detailsIntent = new Intent(this, DetailsActivity.class);
+
+            detailsIntent.putExtra("country", resultList.get(position).getCountry());
+            detailsIntent.putExtra("province", resultList.get(position).getProvince());
+            detailsIntent.putExtra("cases", resultList.get(position).getCase()+"");
+            detailsIntent.putExtra("date", resultList.get(position).getDate());
+            startActivity(detailsIntent);
+        });
     }
 
-    //This class needs 4 functions to work properly:
-//
     private class CovidQuery extends AsyncTask< String, Integer, String> {
 
         public String doInBackground(String ... args)
@@ -77,7 +87,7 @@ public class SearchActivity extends AppCompatActivity {
                 InputStream response = urlConnection.getInputStream();
                 BufferedReader reader = new BufferedReader(new InputStreamReader(response, "UTF-8"), 8);
                 StringBuilder sb = new StringBuilder();
-                String line = null;
+                String line = "";
                 while ((line = reader.readLine()) != null) {
                     sb.append(line + "\n");
                 }
@@ -85,13 +95,13 @@ public class SearchActivity extends AppCompatActivity {
                 JSONArray json = new JSONArray(result);
                 if (json.length() > 0) {
                     for (int i=0;i<json.length();i++) {
-                        JSONObject job = json.getJSONObject(i);  // 遍历 jsonarray 数组，把每一个对象转成 json 对象
-                        province = job.getString("Province");// 得到 每个对象中的属性值
+                        JSONObject job = json.getJSONObject(i);
+                        province = job.getString("Province");
                         caseNumber=job.getInt("Cases");
                         date = job.getString("Date");
                         newSearch= new SearchResult(country,province,caseNumber,date);
                         resultList.add(newSearch);
-                        publishProgress(i/json.length()*100);
+                        publishProgress(i*100/json.length());
                     }
                 }
             }
@@ -108,7 +118,7 @@ public class SearchActivity extends AppCompatActivity {
         protected void onPostExecute(String fromDoInBackground)
         {
             Log.i("HTTP", fromDoInBackground);
-            progressBar.setVisibility(View.INVISIBLE);
+            progressBar.setVisibility(View.VISIBLE);
         }
     }
 

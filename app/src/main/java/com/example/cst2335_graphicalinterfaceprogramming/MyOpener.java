@@ -15,6 +15,9 @@ public class MyOpener extends SQLiteOpenHelper {
     public final static String COL_DATE = "date";
     public final static String COL_ID = "_id";
 
+    /**
+     *
+     */
     public MyOpener(Context ctx)
     {
         super(ctx, DATABASE_NAME, null, VERSION_NUM);

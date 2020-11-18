@@ -12,5 +12,8 @@
     <string name="favorite">Favorite</string>
     <string name="hint">Type Here</string>
     <string name="save">Add To Favorite</string>
+    <string name="clear">Clear</string>
+    <string name="undo">Recovery</string>
+    <string name="hide">Hide</string>
 
 </resources>
