@@ -15,6 +15,10 @@ import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.google.android.material.snackbar.BaseTransientBottomBar;
+import com.google.android.material.snackbar.Snackbar;
+
 import org.json.JSONArray;
 import org.json.JSONObject;
 import java.io.BufferedReader;
@@ -40,7 +44,7 @@ public class SearchActivity extends AppCompatActivity {
     /**
      * Adapter used to listview
      */
-    MyAdapter myAdapter;
+    MyAdapter myAdapter= new MyAdapter();;
     /**
      * ProgressBar is used to show download progress
      */
@@ -55,6 +59,7 @@ public class SearchActivity extends AppCompatActivity {
     String country,fromDate,endDate,province,date;
     int caseNumber;
     SearchResult newSearch;
+    ListView listView;
     @Override
     /**
      * The method is the entry of execute,it equivalent to main method
@@ -66,11 +71,10 @@ public class SearchActivity extends AppCompatActivity {
         country = getIntent().getStringExtra("country");
         fromDate = getIntent().getStringExtra("fromDate");
         endDate = getIntent().getStringExtra("endDate");
-        ListView listView = findViewById(R.id.listView);
+        listView = findViewById(R.id.listView);
+        TextView headerView=findViewById(R.id.header);
         String urlString = "https://api.covid19api.com/country/" + country + "/status/confirmed/live?from=" + fromDate + "T00:00:00Z&to=" + endDate + "T00:00:00Z";
         fQuery.execute(urlString);
-        myAdapter = new MyAdapter();
-        listView.setAdapter(myAdapter);
         progressBar = findViewById(R.id.bar);
         progressBar.setVisibility(View.VISIBLE);
         Button saveButton = findViewById(R.id.save);
@@ -84,6 +88,8 @@ public class SearchActivity extends AppCompatActivity {
 
                     })
                     .setNegativeButton("No", (click, arg) -> {
+                       // final TextView myTextView = findViewById(R.id.topText);
+                        Snackbar.make(headerView,"You didn't do anything!",BaseTransientBottomBar.LENGTH_SHORT).show();
                     })
                     .setView(getLayoutInflater().inflate(R.layout.alert_layout, null))
                     .create().show();
@@ -114,11 +120,8 @@ public class SearchActivity extends AppCompatActivity {
          * This method can call {@link #publishProgress} to publish updates
          * on the UI thread.
          *
-         * @param strings The parameters of the task.
+         * @param args The parameters of the task.
          * @return A result, defined by the subclass of this task.
-         * @see #onPreExecute()
-         * @see #onPostExecute
-         * @see #publishProgress
          */
         @Override
          public String doInBackground(String ... args)
@@ -143,7 +146,8 @@ public class SearchActivity extends AppCompatActivity {
                         date = job.getString("Date");
                         newSearch= new SearchResult(country,province,caseNumber,date);
                         resultList.add(newSearch);
-                       // publishProgress(i*100/json.length());
+                        //myAdapter.notifyDataSetChanged();
+                       publishProgress(i*100/json.length());
                     }
                 }
             }
@@ -157,8 +161,6 @@ public class SearchActivity extends AppCompatActivity {
          * The default version does nothing.
          *
          * @param values The values indicating progress.
-         * @see #publishProgress
-         * @see #doInBackground
          */
         @Override
         protected void onProgressUpdate(Integer... values) {
@@ -176,14 +178,13 @@ public class SearchActivity extends AppCompatActivity {
          *
          * <p>This method won't be invoked if the task was cancelled.</p>
          *
-         * @param s The result of the operation computed by {@link #doInBackground}.
-         * @see #onPreExecute
-         * @see #doInBackground
-         * @see #onCancelled(Object)
+         * @param fromDoInBackground The result of the operation computed by {@link #doInBackground}.
          */
         @Override
-        protected void onPostExecute(String s) {
-            super.onPostExecute(s);
+        protected void onPostExecute(String fromDoInBackground) {
+           // super.onPostExecute(s);
+            Log.i("HTTP", fromDoInBackground);
+            listView.setAdapter(myAdapter);
         }
 
 //        //protected void onPostExecute(String fromDoInBackground)
@@ -238,7 +239,7 @@ public class SearchActivity extends AppCompatActivity {
          *
          * @param position    The position of the item within the adapter's data set of the item whose view
          *                    we want.
-         * @param convertView The old view to reuse, if possible. Note: You should check that this view
+         * @param old         The old view to reuse, if possible. Note: You should check that this view
          *                    is non-null and of an appropriate type before using. If it is not possible to convert
          *                    this view to display the correct data, this method can create a new view.
          *                    Heterogeneous lists can specify their number of view types, so that this View is

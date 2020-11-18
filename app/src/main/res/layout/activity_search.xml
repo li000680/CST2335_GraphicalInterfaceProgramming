@@ -7,7 +7,12 @@
     android:orientation="vertical"
     tools:context=".SearchActivity">
 
-
+    <TextView
+        android:id="@+id/header"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:text="@string/searchHeader"
+        android:layout_gravity="center"/>
     <ListView
         android:id="@+id/listView"
         android:layout_width="wrap_content"
@@ -19,7 +24,8 @@
         android:layout_height="wrap_content"
         android:id="@+id/save"
         android:text="@string/save"
-        android:layout_marginTop="30dp"/>
+        android:layout_marginTop="30dp"
+        android:layout_gravity="center"/>
 
     <ProgressBar
         android:id="@+id/bar"
