@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.cst2335_graphicalinterfaceprogramming">
-    <uses-permission android:name="android.permission.INTERNET" />
 
 
 
@@ -12,11 +11,9 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".FavoriteActivity"></activity>
-        <activity android:name=".DetailsActivity" />
-        <activity android:name=".SearchResult" />
-        <activity android:name=".SearchActivity" />
-        <activity android:name=".Covid19Activity" />
+
+        <activity android:name=".ListOfRecipes"></activity>
+        <activity android:name=".RecipeSearch" />
         <activity android:name=".TicketMasterActivity" />
         <activity android:name=".MainActivity">
             <intent-filter>
