@@ -43,6 +43,10 @@ public class Covid19Activity extends AppCompatActivity {
     ArrayList<String> detailList= new ArrayList<>();
     private SQLiteDatabase db;
     SavedAdapter savedAdapter=new SavedAdapter();
+    CovidDetailsFragment dFragment = new CovidDetailsFragment();
+    public static final String ITEM_SELECTED = "ITEM";
+//    public static final String ITEM_ID = "ID";
+//    public static final String ITEM_TYPE="TYPE";
 
 
     @Override
@@ -67,7 +71,7 @@ public class Covid19Activity extends AppCompatActivity {
 
         country1.setText(savedString1);
         date1.setText(savedString2);
-
+        boolean isTablet = findViewById(R.id.fragment) != null;
         loadSavedDataFromDatabase();
         ListView savedView=findViewById(R.id.savedData);
         savedView.setAdapter(savedAdapter);
@@ -80,6 +84,7 @@ public class Covid19Activity extends AppCompatActivity {
                     .setPositiveButton("Yes", (click, arg) -> {
                         savedList.remove(pos);
                         deleteRecord(selectedRecord);
+                        getSupportFragmentManager().beginTransaction().remove(dFragment).commit();
                         //getSupportFragmentManager().beginTransaction().remove(dFragment).commit();
                         savedAdapter.notifyDataSetChanged();
                     })
@@ -100,6 +105,21 @@ public class Covid19Activity extends AppCompatActivity {
                 String  s1 = detailResults.getString(provinceColIndex);
                 String s2=detailResults.getString(caseColIndex);
                 detailList.add(s1+":"+s2);
+            }
+            for(int i=0;i<detailList.size();i++) {
+                Bundle dataToPass = new Bundle();
+                dataToPass.putString(ITEM_SELECTED, detailList.get(i));
+                if (isTablet) {
+                    // DetailsFragment dFragment = new DetailsFragment(); //add a DetailFragment
+                    dFragment.setArguments(dataToPass);
+                    getSupportFragmentManager().beginTransaction().replace(R.id.fragment, dFragment).commit();
+                }
+                //for Phone:
+                else {
+                    Intent nextActivity = new Intent(this, CovidEmptyActivity.class);
+                    nextActivity.putExtras(dataToPass);
+                    startActivity(nextActivity);
+                }
             }
         });
 

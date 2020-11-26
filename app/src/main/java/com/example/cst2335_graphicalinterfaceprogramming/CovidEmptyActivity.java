@@ -16,9 +16,9 @@ public class CovidEmptyActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_empty);
+        setContentView(R.layout.activity_covid_empty);
         Bundle dataToPass = getIntent().getExtras();
-        DetailsFragment dFragment = new DetailsFragment();
+        CovidDetailsFragment dFragment = new CovidDetailsFragment();
         dFragment.setArguments( dataToPass ); //pass data to the the
         getSupportFragmentManager().beginTransaction().replace(R.id.fragment, dFragment).commit();
 
