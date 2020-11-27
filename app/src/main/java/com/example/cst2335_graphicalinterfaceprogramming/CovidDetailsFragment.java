@@ -19,8 +19,8 @@ import java.util.ArrayList;
 public class CovidDetailsFragment  extends Fragment {
     private Bundle dataFromActivity;
     private AppCompatActivity parentActivity;
-    private FragmentAdapter fragmentAdapter;
-    ArrayList<String> fList=new ArrayList();
+    private FragmentAdapter fragmentAdapter=new FragmentAdapter();
+    ArrayList<String> fragmentList=new ArrayList();
 
     public CovidDetailsFragment() {
         // Required empty public constructor
@@ -31,22 +31,24 @@ public class CovidDetailsFragment  extends Fragment {
                              Bundle savedInstanceState) {
 
         dataFromActivity = getArguments();
-        // Inflate the layout for this fragment
+        //Inflate the layout for this fragment
+        fragmentList = (ArrayList<String>) dataFromActivity.getSerializable("ARRAYLIST");
         View result = inflater.inflate(R.layout.activity_covid_details, container, false);
-
-        ListView listView = result.findViewById(R.id.savedData);
-       listView.setAdapter(fragmentAdapter);
+        ListView detailView = result.findViewById(R.id.details);
+        detailView.setAdapter(fragmentAdapter);
 
         Button hideButton = (Button)result.findViewById(R.id.hide);
         hideButton.setOnClickListener( clk -> parentActivity.getSupportFragmentManager().beginTransaction().remove(this).commit());
         return result;
     }
+
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
         //context will either be FragmentExample for a tablet, or EmptyActivity for phone
         parentActivity = (AppCompatActivity)context;
     }
+
     protected class FragmentAdapter extends BaseAdapter {
         /**
          * How many items are in the data set represented by this Adapter.
@@ -55,7 +57,7 @@ public class CovidDetailsFragment  extends Fragment {
          */
         @Override
         public int getCount() {
-            return fList.size();
+            return fragmentList.size();
         }
 
         /**
@@ -67,7 +69,7 @@ public class CovidDetailsFragment  extends Fragment {
          */
         @Override
         public String getItem(int position){
-            return fList.get(position);
+            return fragmentList.get(position);
         }
 
         /**
@@ -92,7 +94,7 @@ public class CovidDetailsFragment  extends Fragment {
         public View getView(int position, View old, ViewGroup parent) {
             String sr = getItem(position);
             LayoutInflater inflater = getLayoutInflater();
-            View view = inflater.inflate(R.layout.activity_covid_details, parent, false);
+            View view = inflater.inflate(R.layout.activity_search_result, parent, false);
             if (sr != null) {
                 TextView savedView = view.findViewById(R.id.searchResult);
                 savedView.setText(sr);
@@ -110,4 +112,5 @@ public class CovidDetailsFragment  extends Fragment {
             return position;
         }
     }
+
 }

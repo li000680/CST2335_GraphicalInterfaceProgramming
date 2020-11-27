@@ -30,6 +30,7 @@ import android.widget.Toast;
 import com.google.android.material.snackbar.BaseTransientBottomBar;
 import com.google.android.material.snackbar.Snackbar;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
 /**
@@ -39,14 +40,11 @@ import java.util.ArrayList;
  */
 public class Covid19Activity extends AppCompatActivity {
     SharedPreferences prefs=null;
-    ArrayList<String> savedList= new ArrayList<>();
-    ArrayList<String> detailList= new ArrayList<>();
+    ArrayList<String> dateList= new ArrayList<>();
     private SQLiteDatabase db;
     SavedAdapter savedAdapter=new SavedAdapter();
     CovidDetailsFragment dFragment = new CovidDetailsFragment();
-    public static final String ITEM_SELECTED = "ITEM";
-//    public static final String ITEM_ID = "ID";
-//    public static final String ITEM_TYPE="TYPE";
+
 
 
     @Override
@@ -76,13 +74,13 @@ public class Covid19Activity extends AppCompatActivity {
         ListView savedView=findViewById(R.id.savedData);
         savedView.setAdapter(savedAdapter);
         savedView.setOnItemLongClickListener((p, b, pos, id)->{
-            String selectedRecord = savedList.get(pos);
+            String selectedRecord = dateList.get(pos);
             AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
             alertDialogBuilder.setTitle("Do you want to delete it?")
                     //What is the message:
                     .setMessage("The country is: " + selectedRecord.substring(11) + "\nThe date is: "+selectedRecord.substring(0,10))
                     .setPositiveButton("Yes", (click, arg) -> {
-                        savedList.remove(pos);
+                        dateList.remove(pos);
                         deleteRecord(selectedRecord);
                         getSupportFragmentManager().beginTransaction().remove(dFragment).commit();
                         //getSupportFragmentManager().beginTransaction().remove(dFragment).commit();
@@ -94,33 +92,35 @@ public class Covid19Activity extends AppCompatActivity {
                     .create().show();
             return true;
         });
-        savedView.setOnItemClickListener((p,b,pos,id)->{
-            String s=savedList.get(pos);
-             String [] columns1 = {CovidOpener.COL_PROVINCE,CovidOpener.COL_CASE};
-                Cursor detailResults=db.query(false,CovidOpener.TABLE_NAME,columns1, CovidOpener.COL_DATE + "= ? and "+CovidOpener.COL_COUNTRY+" =?",
-                    new String[]{s.substring(0,10),s.substring(11)},null,null,null,null);
-                int provinceColIndex = detailResults.getColumnIndex(CovidOpener.COL_PROVINCE);
-                int caseColIndex = detailResults.getColumnIndex(CovidOpener.COL_CASE);
-            while(detailResults.moveToNext()){
-                String  s1 = detailResults.getString(provinceColIndex);
-                String s2=detailResults.getString(caseColIndex);
-                detailList.add(s1+":"+s2);
-            }
-            for(int i=0;i<detailList.size();i++) {
-                Bundle dataToPass = new Bundle();
-                dataToPass.putString(ITEM_SELECTED, detailList.get(i));
-                if (isTablet) {
-                    // DetailsFragment dFragment = new DetailsFragment(); //add a DetailFragment
-                    dFragment.setArguments(dataToPass);
-                    getSupportFragmentManager().beginTransaction().replace(R.id.fragment, dFragment).commit();
-                }
-                //for Phone:
-                else {
-                    Intent nextActivity = new Intent(this, CovidEmptyActivity.class);
-                    nextActivity.putExtras(dataToPass);
-                    startActivity(nextActivity);
-                }
-            }
+        savedView.setOnItemClickListener((list, view, position, id) -> {
+            //get the detailed list data
+                    String s=dateList.get(position);
+                    String [] columns1 = {CovidOpener.COL_PROVINCE,CovidOpener.COL_CASE};
+                    Cursor detailResults=db.query(true,CovidOpener.TABLE_NAME,columns1, CovidOpener.COL_DATE + "= ? and "+CovidOpener.COL_COUNTRY+" =?",
+                            new String[]{s.substring(0,10),s.substring(11)},null,null,null,null);
+                    int provinceColIndex = detailResults.getColumnIndex(CovidOpener.COL_PROVINCE);
+                    int caseColIndex = detailResults.getColumnIndex(CovidOpener.COL_CASE);
+                    ArrayList<String> detailList= new ArrayList<>();
+                    while(detailResults.moveToNext()) {
+                        String s1 = detailResults.getString(provinceColIndex);
+                        String s2 = detailResults.getString(caseColIndex);
+                        detailList.add(s1 + ":" + s2);
+                    }
+                        //create a bundle to transfer data
+                        Bundle dataToPass = new Bundle();
+                        dataToPass.putSerializable("ARRAYLIST", (Serializable) detailList);
+                        if (isTablet) {
+                            // DetailsFragment dFragment = new DetailsFragment(); //add a DetailFragment
+                            dFragment.setArguments(dataToPass);
+                            getSupportFragmentManager().beginTransaction().replace(R.id.fragment, dFragment).commit();
+                        }
+                        //for Phone:
+                        else {
+                            Intent nextActivity = new Intent(this, CovidEmptyActivity.class);
+                            //nextActivity.putExtras(dataToPass);
+                            nextActivity.putExtra("BUNDLE", dataToPass);
+                            startActivity(nextActivity);
+                        }
         });
 
         Button searchButton = findViewById(R.id.entrySearch);
@@ -182,12 +182,15 @@ public class Covid19Activity extends AppCompatActivity {
         while(results.moveToNext()){
             String  s1 = results.getString(dateColIndex);
             String s2=results.getString(countryColIndex);
-            savedList.add(s1+" "+s2);
+            dateList.add(s1+" "+s2);
         }
     }
     protected void deleteRecord(String s) {
-        db.delete(CovidOpener.TABLE_NAME, CovidOpener.COL_DATE + "= ? and "+CovidOpener.COL_COUNTRY+" =?",
-                new String[]{s.substring(0,9),s.substring(11)});
+        String r1=s.substring(0,10);
+        String r2=s.substring(11);
+        db.delete(CovidOpener.TABLE_NAME, CovidOpener.COL_DATE + "=? and "+CovidOpener.COL_COUNTRY+"=?",
+                new String[]{r1,r2});
+
     }
 
     protected class SavedAdapter extends BaseAdapter {
@@ -198,7 +201,7 @@ public class Covid19Activity extends AppCompatActivity {
          */
         @Override
         public int getCount() {
-            return savedList.size();
+            return dateList.size();
         }
 
         /**
@@ -210,7 +213,7 @@ public class Covid19Activity extends AppCompatActivity {
          */
         @Override
         public String getItem(int position){
-            return savedList.get(position);
+            return dateList.get(position);
         }
 
         /**
