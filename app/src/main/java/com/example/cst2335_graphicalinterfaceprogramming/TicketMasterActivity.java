@@ -312,7 +312,10 @@ public class TicketMasterActivity extends AppCompatActivity {
                     listItem.put("imgUrl", image.getString("url"));
                     listItem.put("city", args[0]);
                     listItem.put("localDate", event.getJSONObject("dates").getJSONObject("start").getString("localDate"));
-                    listItem.put("localTime", event.getJSONObject("dates").getJSONObject("start").getString("localTime"));
+                    if(event.getJSONObject("dates").getJSONObject("start").has("localTime"))
+                        listItem.put("localTime", event.getJSONObject("dates").getJSONObject("start").getString("localTime"));
+                    else
+                        listItem.put("localTime", "None");
                     listItem.put("min", price.getString("min"));
                     listItem.put("max", price.getString("max"));
                     listItem.put("currency", price.getString("currency"));
@@ -359,7 +362,7 @@ public class TicketMasterActivity extends AppCompatActivity {
         public void onPostExecute(String fromDoInBackground) {
             Toast toast;
             if(totalElement > 0) {
-                toast = Toast.makeText(TicketMasterActivity.this.getApplicationContext(), totalElement+getResources().getString(R.string.ticketLoad), Toast.LENGTH_LONG);
+                toast = Toast.makeText(TicketMasterActivity.this.getApplicationContext(), totalElement+" "+getResources().getString(R.string.ticketLoad), Toast.LENGTH_LONG);
             }
             else {
                 toast = Toast.makeText(TicketMasterActivity.this.getApplicationContext(), getResources().getString(R.string.ticketNoFound), Toast.LENGTH_LONG);
@@ -413,6 +416,7 @@ public class TicketMasterActivity extends AppCompatActivity {
             }
             return row;
         }
+
         /**
          * Method gets a event's id from a database
          * @param position position of a event in a list
